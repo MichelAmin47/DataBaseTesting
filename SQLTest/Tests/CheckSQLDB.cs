@@ -55,6 +55,7 @@ namespace SQLTest.Tests
                                        "database=TestDB; " +
                                        "connection timeout=30";
                 sqlConnection.Open();
+                Console.WriteLine("Connection established (" + sqlConnection.ServerVersion + ")"); 
 
                 SqlCommand sqlCommand = new SqlCommand("SELECT 1", sqlConnection);
                 SqlDataReader sqlDataReader = sqlCommand.ExecuteReader();
