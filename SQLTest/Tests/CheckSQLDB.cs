@@ -37,7 +37,7 @@ namespace SQLTest.Tests
         [TestMethod]
         public void RetrieveXMLData()
         {
-            Console.WriteLine(GetCredentionals("MSSQL", "userid")); 
+            Console.WriteLine(GetCredentionals("MSSQL", "userid"));
             Console.WriteLine(GetCredentionals("MSSQL", "password"));
             Console.WriteLine(GetCredentionals("MSSQL", "server"));
         }
@@ -64,7 +64,7 @@ namespace SQLTest.Tests
                 bool dbHasContent = sqlDataReader.HasRows;
                 sqlDataReader.Close();
 
-                Assert.IsTrue((dbHasContent && !(fieldCount.Equals(0)) ), "SQL query retrieving all returned empty");
+                Assert.IsTrue((dbHasContent && !(fieldCount.Equals(0))), "SQL query retrieving all returned empty");
             }
         }
 
@@ -126,6 +126,42 @@ namespace SQLTest.Tests
                 {
                     Console.WriteLine(e.ToString());
                 }
+            }
+        }
+
+        [TestMethod]
+        public void PingOracleAmazonRDS()
+        {
+            using (OracleConnection oracleConnection = new OracleConnection())
+            {
+                OracleConnectionStringBuilder oracleConnectionStringBuilder = new OracleConnectionStringBuilder();
+                oracleConnectionStringBuilder.Password = GetCredentionals("Oracle", "password");
+                oracleConnectionStringBuilder.UserID = GetCredentionals("Oracle", "userid");
+                oracleConnectionStringBuilder.DataSource = GetCredentionals("Oracle", "server");
+
+                oracleConnection.ConnectionString = oracleConnectionStringBuilder.ConnectionString;
+                oracleConnection.Open();
+                Console.WriteLine("Connection established (" + oracleConnection.ServerVersion + ")");
+
+                // Create the OracleCommand
+                OracleCommand oracleCommand = new OracleCommand("SELECT 1 FROM dual");
+
+                oracleCommand.Connection = oracleConnection;
+                oracleCommand.CommandType = CommandType.Text;
+
+                // Execute command, create OracleDataReader object
+                OracleDataReader oracleDataReaderReader = oracleCommand.ExecuteReader();
+
+                bool dbHasContent = oracleDataReaderReader.HasRows;
+                //Console.WriteLine(oracleDataReaderReader.HasRows);
+
+                int fieldCount = oracleDataReaderReader.FieldCount;
+                //Console.WriteLine(oracleDataReaderReader.FieldCount);
+
+                oracleDataReaderReader.Dispose();
+                oracleCommand.Dispose();
+
+                Assert.IsTrue((dbHasContent && !(fieldCount.Equals(0))), "SQL query retrieving all returned empty");
             }
         }
 
