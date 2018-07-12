@@ -1,6 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
-<Creds>
-  <MSSQLcreds userid="tester" password="1qazxsw2" server="miestestdb.czd2tmikojnh.eu-central-1.rds.amazonaws.com" />
-  <Oraclecreds userid="michelamin" password="1qazxsw2" server="miesoracledbtest.czd2tmikojnh.eu-central-1.rds.amazonaws.com:1521/ORCL" />
-</Creds>
-
