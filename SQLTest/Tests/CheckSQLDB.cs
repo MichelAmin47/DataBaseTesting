@@ -37,7 +37,7 @@ namespace SQLTest.Tests
         [TestMethod]
         public void RetrieveXMLData()
         {
-            Console.WriteLine(GetCredentionals("MSSQL", "userid")); 
+            Console.WriteLine(GetCredentionals("MSSQL", "userid"));
             Console.WriteLine(GetCredentionals("MSSQL", "password"));
             Console.WriteLine(GetCredentionals("MSSQL", "server"));
         }
@@ -64,7 +64,7 @@ namespace SQLTest.Tests
                 bool dbHasContent = sqlDataReader.HasRows;
                 sqlDataReader.Close();
 
-                Assert.IsTrue((dbHasContent && !(fieldCount.Equals(0)) ), "SQL query retrieving all returned empty");
+                Assert.IsTrue((dbHasContent && !(fieldCount.Equals(0))), "SQL query retrieving all returned empty");
             }
         }
 
@@ -130,51 +130,81 @@ namespace SQLTest.Tests
         }
 
         [TestMethod]
+        public void PingOracleAmazonRDS()
+        {
+            using (OracleConnection oracleConnection = new OracleConnection())
+            {
+                OracleConnectionStringBuilder oracleConnectionStringBuilder = new OracleConnectionStringBuilder();
+                oracleConnectionStringBuilder.Password = GetCredentionals("Oracle", "password");
+                oracleConnectionStringBuilder.UserID = GetCredentionals("Oracle", "userid");
+                oracleConnectionStringBuilder.DataSource = GetCredentionals("Oracle", "server");
+
+                oracleConnection.ConnectionString = oracleConnectionStringBuilder.ConnectionString;
+                oracleConnection.Open();
+                Console.WriteLine("Connection established (" + oracleConnection.ServerVersion + ")");
+
+                // Create the OracleCommand
+                OracleCommand oracleCommand = new OracleCommand("SELECT 1 FROM dual");
+
+                oracleCommand.Connection = oracleConnection;
+                oracleCommand.CommandType = CommandType.Text;
+
+                // Execute command, create OracleDataReader object
+                OracleDataReader oracleDataReaderReader = oracleCommand.ExecuteReader();
+
+                bool dbHasContent = oracleDataReaderReader.HasRows;
+                //Console.WriteLine(oracleDataReaderReader.HasRows);
+
+                int fieldCount = oracleDataReaderReader.FieldCount;
+                //Console.WriteLine(oracleDataReaderReader.FieldCount);
+
+                oracleDataReaderReader.Dispose();
+                oracleCommand.Dispose();
+
+                Assert.IsTrue((dbHasContent && !(fieldCount.Equals(0))), "SQL query retrieving all returned empty");
+            }
+        }
+
+        [TestMethod]
         public void RetrieveOracleAmazonRDSData()
         {
-            // create connection
-            OracleConnection con = new OracleConnection();
-            // create connection string using builder
-            OracleConnectionStringBuilder ocsb = new OracleConnectionStringBuilder();
-            ocsb.Password = GetCredentionals("Oracle", "password");
-            ocsb.UserID = GetCredentionals("Oracle", "userid");
-            ocsb.DataSource = GetCredentionals("Oracle", "server");
+            using (OracleConnection oracleConnection = new OracleConnection())
+            {
+                OracleConnectionStringBuilder oracleConnectionStringBuilder = new OracleConnectionStringBuilder();
+                oracleConnectionStringBuilder.Password = GetCredentionals("Oracle", "password");
+                oracleConnectionStringBuilder.UserID = GetCredentionals("Oracle", "userid");
+                oracleConnectionStringBuilder.DataSource = GetCredentionals("Oracle", "server");
 
-            // connect
-            con.ConnectionString = ocsb.ConnectionString;
+                oracleConnection.ConnectionString = oracleConnectionStringBuilder.ConnectionString;
+                oracleConnection.Open();
+                Console.WriteLine("Connection established (" + oracleConnection.ServerVersion + ")");
 
-            try
-            {
-                con.Open();
-                Console.WriteLine("Connection established (" + con.ServerVersion + ")");
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
-            }
-            /*
-            try
-            {
-                OracleCommand command = new OracleCommand();
-                command.CommandText = "select * from PRODUCT";
-                OracleDataReader reader = command.ExecuteReader();
-                while (reader.Read())
+                try
                 {
-                    Console.WriteLine(reader.GetValue(0));
+                    string cmdQuery = "select * from PRODUCT";
+
+                    // Create the OracleCommand
+                    OracleCommand oracleCommand = new OracleCommand(cmdQuery);
+
+                    oracleCommand.Connection = oracleConnection;
+                    oracleCommand.CommandType = CommandType.Text;
+
+                    // Execute command, create OracleDataReader object
+                    OracleDataReader oracleDataReaderReader = oracleCommand.ExecuteReader();
+
+                    while (oracleDataReaderReader.Read())
+                    {
+                        if (!oracleDataReaderReader.IsDBNull(0))
+                        {
+                            Console.WriteLine(oracleDataReaderReader.GetString(0));
+                        }
+                    }
+                    oracleCommand.Dispose();
                 }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
-            }
-            */
-            try
-            {
-                con.Close();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.ToString());
+                }
             }
         }
     }
