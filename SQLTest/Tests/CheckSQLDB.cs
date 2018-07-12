@@ -132,49 +132,43 @@ namespace SQLTest.Tests
         [TestMethod]
         public void RetrieveOracleAmazonRDSData()
         {
-            // create connection
-            OracleConnection con = new OracleConnection();
-            // create connection string using builder
-            OracleConnectionStringBuilder ocsb = new OracleConnectionStringBuilder();
-            ocsb.Password = GetCredentionals("Oracle", "password");
-            ocsb.UserID = GetCredentionals("Oracle", "userid");
-            ocsb.DataSource = GetCredentionals("Oracle", "server");
+            using (OracleConnection oracleConnection = new OracleConnection())
+            {
+                OracleConnectionStringBuilder oracleConnectionStringBuilder = new OracleConnectionStringBuilder();
+                oracleConnectionStringBuilder.Password = GetCredentionals("Oracle", "password");
+                oracleConnectionStringBuilder.UserID = GetCredentionals("Oracle", "userid");
+                oracleConnectionStringBuilder.DataSource = GetCredentionals("Oracle", "server");
 
-            // connect
-            con.ConnectionString = ocsb.ConnectionString;
+                oracleConnection.ConnectionString = oracleConnectionStringBuilder.ConnectionString;
+                oracleConnection.Open();
+                Console.WriteLine("Connection established (" + oracleConnection.ServerVersion + ")");
 
-            try
-            {
-                con.Open();
-                Console.WriteLine("Connection established (" + con.ServerVersion + ")");
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
-            }
-            /*
-            try
-            {
-                OracleCommand command = new OracleCommand();
-                command.CommandText = "select * from PRODUCT";
-                OracleDataReader reader = command.ExecuteReader();
-                while (reader.Read())
+                try
                 {
-                    Console.WriteLine(reader.GetValue(0));
+                    string cmdQuery = "select * from PRODUCT";
+
+                    // Create the OracleCommand
+                    OracleCommand oracleCommand = new OracleCommand(cmdQuery);
+
+                    oracleCommand.Connection = oracleConnection;
+                    oracleCommand.CommandType = CommandType.Text;
+
+                    // Execute command, create OracleDataReader object
+                    OracleDataReader oracleDataReaderReader = oracleCommand.ExecuteReader();
+
+                    while (oracleDataReaderReader.Read())
+                    {
+                        if (!oracleDataReaderReader.IsDBNull(0))
+                        {
+                            Console.WriteLine(oracleDataReaderReader.GetString(0));
+                        }
+                    }
+                    oracleCommand.Dispose();
                 }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
-            }
-            */
-            try
-            {
-                con.Close();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.ToString());
+                }
             }
         }
     }
